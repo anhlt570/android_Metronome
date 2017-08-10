@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Metronome</string>
+    <string-array name="tempos">
+        <item>Grave</item>
+        <item>Largo, Lento</item>
+        <item>Larghetto</item>
+        <item>Adagio</item>
+        <item>Andante</item>
+        <item>Andantino</item>
+        <item>Allegro</item>
+        <item>Vivace</item>
+        <item>Presto</item>
+        <item>Prestissimo</item>
+        <item>Moderato</item>
+        <item>Molto</item>
+        <item>Grave</item>
+    </string-array>
+</resources>

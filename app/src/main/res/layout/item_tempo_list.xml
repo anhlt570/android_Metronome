@@ -4,17 +4,5 @@
     android:layout_height="match_parent"
     android:layout_marginTop="1dp"
     android:layout_marginBottom="1dp">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textSize="17sp"
-        android:id="@+id/tv_tempo_name"
-        android:text="sample text"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textSize="12sp"
-        android:id="@+id/tv_tempo_speed_scope" />
+
 </LinearLayout>

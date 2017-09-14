@@ -1,99 +1,107 @@
 package com.anhlt.metronome;
 
-import android.content.Context;
-import android.content.PeriodicSync;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
-    public static final String TAG = "AnhLT";
-    private ImageView imgWheel;
-    private TextView tvSpeed;
+import java.util.ArrayList;
 
-    public static final String KEY_CURRENT_SPEED= "current.speed";
-    private float mCurrentSpeed;
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+    public Button btnLeft, btnCenter, btnRight;
+    public TextView tvTitle;
+    public ImageView rotationObject;
+
+    public double cX, cY;
+    ArrayList<Vector> listMotion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mCurrentSpeed = getSavedCurrentSpeed();
-        initViews();
+        initView();
     }
 
+    public void initView() {
+        listMotion = new ArrayList<>();
+        btnLeft = (Button) findViewById(R.id.btn_left);
+        btnCenter = (Button) findViewById(R.id.btn_center);
+        btnRight = (Button) findViewById(R.id.btn_right);
 
-    public void initViews() {
-        tvSpeed = (TextView) findViewById(R.id.tv_speed);
-        imgWheel = (ImageView) findViewById(R.id.img_wheel);
-        Log.d(TAG, "initViews: "+ imgWheel.getPivotX() + " - "+ imgWheel.getY());
-        Log.d(TAG, "initViews: "+ imgWheel.getWidth() + " - "+ imgWheel.getHeight());
-        imgWheel.setOnTouchListener(this);
-        initTemposListView();
+        tvTitle = (TextView) findViewById(R.id.tv_title);
+        rotationObject = (ImageView) findViewById(R.id.rotation_object);
+        rotationObject.setOnTouchListener(this);
     }
 
-    public void initTemposListView() {
+    public double preX, preY;
+    public Vector v0;
 
-        ListView lvTempos = (ListView) findViewById(R.id.lv_tempos);
-        TemposListAdapter adapter = new TemposListAdapter(this);
-        lvTempos.setAdapter(adapter);
-
-        lvTempos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Tempo tempo= Data.getInstance().getTemposList().get(position);
-                Log.d(TAG, "onItemClick: "+ tempo.getAverageSpeed()+tvSpeed.getId());
-                tvSpeed.setText(tempo.getAverageSpeed()+"");
-            }
-        });
-    }
-
-    public void saveCurrentSpeed()
-    {
-        SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putFloat(KEY_CURRENT_SPEED,mCurrentSpeed);
-        editor.apply();
-    }
-
-    public float getSavedCurrentSpeed()
-    {
-        SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-        return preferences.getFloat(KEY_CURRENT_SPEED,0);
-    }
-
-
-    private float x0,y0;
     @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(view.getId() == R.id.img_wheel)
-        {
-            switch (motionEvent.getAction())
-            {
+    public boolean onTouch(View v, MotionEvent event) {
+        if (v.getId() == R.id.rotation_object) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    x0= motionEvent.getX();
-                    y0= motionEvent.getY();
-                    Log.d(TAG, "onTouch: down "+x0+" - "+y0);
+                    cX = rotationObject.getWidth() / 2;
+                    cY = rotationObject.getHeight() / 2;
+                    v0 = new Vector(0, -cY);
+                    preX = event.getX();
+                    preY = event.getY();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    float x1 ,y1;
-                    x1 = motionEvent.getX();
-                    y1 = motionEvent.getY();
-                    Log.d(TAG, "onTouch: move "+ x1+ " - "+y1);
+                    float x = event.getX();
+                    float y = event.getY();
+                    listMotion.add(new Vector(x - cX, y - cY));
+                    Vector preVector = new Vector(preX - cX, preY - cY);
+                    Vector currentVector = listMotion.get(0);
+                    listMotion.remove(0);
+                    double preAngle = getAngle(v0, preVector, x < cX);
+                    double currentAngle = getAngle(v0, currentVector, x < cX);
+                    double delta;
+                    if (preAngle - currentAngle > 180) delta = currentAngle + 360 - preAngle;
+                    else if (currentAngle - preAngle > 180) delta = currentAngle - preAngle - 360;
+                    else delta = currentAngle - preAngle;
+                    if (Math.abs(delta) >= 1) {
+                        if (Math.abs(delta) > 90) {
+                            preX = x;
+                            preY = y;
+                            return true;
+                        }
+
+                        rotationObject.setRotation((float) Math.floor(rotationObject.getRotation() + delta));
+                        int round = (int) (rotationObject.getRotation() % 2);
+                        tvTitle.setText((int) (rotationObject.getRotation() * 240 / 360 + (round * 120)) + "");
+
+                    }
                     break;
                 case MotionEvent.ACTION_UP:
-                    Log.d(TAG, "onTouch: up");
+                    break;
+                default:
                     break;
             }
         }
         return true;
+    }
+
+    private double getAngle(Vector v1, Vector v2, boolean isBigAngle) {
+        double angle = 180 * Math.acos((v1.x * v2.x + v1.y * v2.y) / (v1.Magnitude() * v2.Magnitude())) / Math.PI;
+        if (isBigAngle) return 360 - angle;
+        return angle;
+    }
+
+    private class Vector {
+        public double x, y;
+
+        public Vector(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double Magnitude() {
+            return Math.sqrt(x * x + y * y);
+        }
     }
 }

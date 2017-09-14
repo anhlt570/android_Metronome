@@ -6,44 +6,44 @@ package com.anhlt.metronome;
 
 public class Tempo {
     private String name;
-    private int lowerSpeed, upperSpeed;
+    private int minSpeed, maxSpeed;
 
-    Tempo(String name, int lowerSpeed, int upperSpeed) {
+    Tempo(String name, int minSpeed, int maxSpeed) {
         this.name = name;
-        this.lowerSpeed = lowerSpeed;
-        this.upperSpeed = upperSpeed;
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
     }
 
     public String generateSpeedScope() {
-        return "(" + lowerSpeed + " - " + upperSpeed + ")";
+        return "(" + minSpeed + " - " + maxSpeed + ")";
     }
 
     public int getAverageSpeed()
     {
-        return (lowerSpeed+upperSpeed)/2;
+        return (minSpeed + maxSpeed)/2;
     }
-    public int getLowerSpeed() {
-        return lowerSpeed;
+    public int getMinSpeed() {
+        return minSpeed;
     }
 
-    public int getUpperSpeed() {
-        return upperSpeed;
+    public int getMaxSpeed() {
+        return maxSpeed;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setLowerSpeed(int lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
+    public void setMinSpeed(int minSpeed) {
+        this.minSpeed = minSpeed;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setUpperSpeed(int upperSpeed) {
-        this.upperSpeed = upperSpeed;
+    public void setMaxSpeed(int maxSpeed) {
+        this.maxSpeed = maxSpeed;
     }
 }
 
